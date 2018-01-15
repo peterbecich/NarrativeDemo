@@ -1,5 +1,10 @@
 package me.peterbecich.narrativedemo
 
+import doobie._, doobie.implicits._
+import doobie.postgres.implicits._
+
+import cats._, cats.data._, cats.effect.IO, cats.implicits._
+
 import java.util.UUID
 
 /*
@@ -13,3 +18,14 @@ http://tpolecat.github.io/doobie/docs/17-FAQ.html#how-do-i-resolve-error-could-n
 
 
 case class User(userId: UUID)
+
+object User {
+
+  def newUser: User = User(UUID.randomUUID())
+
+  // http://tpolecat.github.io/doobie/docs/07-Updating.html#inserting
+
+  def insertUser(user: User): Update0 =
+    sql"insert into users (userId) values (${user.userId})".update
+
+}

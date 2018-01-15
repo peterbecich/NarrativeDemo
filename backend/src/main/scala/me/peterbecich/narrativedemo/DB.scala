@@ -17,7 +17,10 @@ object DB {
 
   // https://jdbc.postgresql.org/documentation/head/connect.html
   val xa = Transactor.fromDriverManager[IO](
-    "org.postgresql.Driver", "jdbc:postgresql://server_narrative-postgres_1:5432/", "postgres", "${getPostgresPassword}"
+    "org.postgresql.Driver",
+    "jdbc:postgresql://server_narrative-postgres_1:5432/",
+    "postgres",
+    "${getPostgresPassword}"
   )
 
   val retrieveUsersQuery: Query0[User] =
