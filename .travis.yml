@@ -7,8 +7,8 @@ cache:
   timeout: 600
   directories:
     - $HOME/.ivy2
-    - $HOME/.sbt
-    - $HOME/build/peterbecich/NarrativeDemo/target
+    # - $HOME/.sbt
+    # - $HOME/build/peterbecich/NarrativeDemo/target
 
 # before_install:
 #   - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
