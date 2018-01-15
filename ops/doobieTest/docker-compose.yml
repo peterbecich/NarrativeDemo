@@ -3,12 +3,14 @@ version: '3'
 services:
   narrative-demo:
     build: .
-    image: peterbecich/narrativedemo-doobie-test:latest
+    image: peterbecich/narrativedemo-doobie-test-doobie-test:latest
     # ports:
     #   - "0.0.0.0:80:8080"
+    networks:
+      - narrative-network
     deploy:
       replicas: 1
-    restart: always
+    # restart: always
   # https://github.com/peterbecich/stock-ops/blob/master/production/docker-compose.yml
   narrative-postgres:
     build:
