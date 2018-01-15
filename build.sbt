@@ -2,6 +2,27 @@ val Http4sVersion = "0.18.0-M7"
 val Specs2Version = "4.0.2"
 val LogbackVersion = "1.2.3"
 
+enablePlugins(DockerPlugin)
+
+// https://github.com/marcuslonnberg/sbt-docker
+imageNames in docker := Seq(
+  // Sets the latest tag
+  ImageName(s"peterbecich/${name.value}:latest")
+)
+
+dockerfile in docker := {
+  // The assembly task generates a fat JAR file
+  val artifact: File = assembly.value
+  val artifactTargetPath = s"/app/${artifact.name}"
+
+  new Dockerfile {
+    from("openjdk:8-jre")
+    add(artifact, artifactTargetPath)
+    entryPoint("java", "-jar", artifactTargetPath)
+  }
+}
+
+
 lazy val root = (project in file("."))
   .settings(
     organization := "me.peterbecich",
