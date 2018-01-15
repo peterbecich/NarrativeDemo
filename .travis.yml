@@ -16,6 +16,7 @@ cache:
     
 script:
   - sbt compile
+  - sbt test
   - sbt docker
     
 jdk:
