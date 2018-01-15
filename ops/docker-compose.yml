@@ -1,3 +1,34 @@
 version: '3'
 
 services:
+  narrative-demo:
+    build: .
+    image: peterbecich/narrativedemo:latest
+    ports:
+      - "0.0.0.0:80:8080"
+    deploy:
+      replicas: 1
+    restart: always
+  # https://github.com/peterbecich/stock-ops/blob/master/production/docker-compose.yml
+  narrative-postgres:
+    build:
+      context: .
+      dockerfile: dockerfiles/postgres.dockerfile
+    image: peterbecich/narrative-postgres:latest
+    networks:
+      - narrative-network
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD:'${POSTGRES_PASSWORD}'
+    expose:
+      - "5432"
+    volumes:
+      - "narrative-postgres-volume:/var/lib/postgresql/data"
+  
+
+networks:
+  narrative-network:
+
+volumes:
+  narrative-postgres-volume:
+      

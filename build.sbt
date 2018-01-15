@@ -34,7 +34,9 @@ lazy val root = (project in file("."))
       "org.http4s"      %% "http4s-circe"        % Http4sVersion,
       "org.http4s"      %% "http4s-dsl"          % Http4sVersion,
       "org.specs2"     %% "specs2-core"          % Specs2Version % "test",
-      "ch.qos.logback"  %  "logback-classic"     % LogbackVersion
+      "ch.qos.logback"  %  "logback-classic"     % LogbackVersion,
+      "org.tpolecat" %% "doobie-core"      % "0.5.0-M13",
+      "org.tpolecat" %% "doobie-postgres"  % "0.5.0-M13" // Postgres driver 42.1.4 + type mappings.
     )
   )
 
