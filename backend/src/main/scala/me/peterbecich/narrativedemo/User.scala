@@ -17,6 +17,7 @@ http://tpolecat.github.io/doobie/docs/17-FAQ.html#how-do-i-resolve-error-could-n
  */
 
 
+// TODO user created timestamp
 case class User(userId: UUID)
 
 object User {
@@ -27,5 +28,8 @@ object User {
 
   def insertUser(user: User): Update0 =
     sql"insert into users (userId) values (${user.userId})".update
+
+  val userCount: Query0[Int] =
+    sql"select count(*) from users".query[Int]
 
 }

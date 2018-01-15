@@ -40,5 +40,10 @@ object DoobieTest extends App {
   println("users:")
   users.foreach(println(_))
 
+  // https://static.javadoc.io/org.tpolecat/doobie-core_2.12/0.5.0-M13/doobie/util/query$.html#Query0[B]extendsAnyRef
+  println("user count")
+  val count = User.userCount.unique.transact(xa).unsafeRunSync
+  println(count)
+
 
 }
