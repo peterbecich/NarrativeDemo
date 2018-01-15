@@ -32,7 +32,7 @@ val deps = Seq(
   "org.tpolecat" %% "doobie-scalatest" % doobie  // ScalaTest support for typechecking statements.
 )
 
-lazy val server = (project in file("server"))
+lazy val backend = (project in file("backend"))
   .settings(
     organization := "me.peterbecich",
     name := "narrativedemo",
@@ -82,6 +82,6 @@ lazy val doobieTest = (project in file("doobieTest"))
       }
     },
     scalacOptions += "-Ypartial-unification" // 2.11.9+
-  ).dependsOn(server)
+  ).dependsOn(backend)
 
 
