@@ -23,9 +23,5 @@ object DB {
     "${getPostgresPassword}"
   )
 
-  val retrieveUsersQuery: Query0[User] =
-    sql"select * from users".query[User]
-
-  def retrieveUsers: ConnectionIO[List[User]] = retrieveUsersQuery.list
 
 }

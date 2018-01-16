@@ -1,7 +1,8 @@
 
 
 create table if not exists users (
-       userId uuid not null primary key
+       userId uuid not null primary key,
+       createdAt timestamp not null
        );
 
 

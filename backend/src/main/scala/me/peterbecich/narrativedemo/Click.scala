@@ -37,4 +37,8 @@ object Click {
   val clickCount: Query0[Int] =
     sql"select count(*) from clicks".query[Int] // TODO use long?
 
+  val _retrieveClicks: Query0[(UUID, java.sql.Timestamp, UUID, java.sql.Timestamp)] =
+    sql"select (clickId, timestamp, userId, createdAt) from clicks join users on clicks.userId == users.userId"
+      .query[(UUID, java.sql.Timestamp, UUID, java.sql.Timestamp)]
+
 }
