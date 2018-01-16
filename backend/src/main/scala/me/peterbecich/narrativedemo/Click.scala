@@ -3,7 +3,8 @@ package me.peterbecich.narrativedemo
 import doobie._, doobie.implicits._
 import doobie.postgres.implicits._
 
-import cats._, cats.data._, cats.effect.IO, cats.implicits._
+import cats._, cats.data._, cats.implicits._
+import cats.effect._
 
 import java.util.UUID
 import java.time.LocalDateTime
@@ -20,9 +21,17 @@ case class Click(clickId: UUID, timestamp: LocalDateTime, user: User)
 
 object Click {
 
-  def newClick(user: User): Click =
-    Click(UUID.randomUUID(), LocalDateTime.now(), user)
-
+  def createClick(user: User, opMillisEpoch: Option[Long] = None): IO[Click] =
+    IO {
+      opMillisEpoch match {
+        case None => Click(UUID.randomUUID(), LocalDateTime.now(), user)
+        case Some(millisEpoch) =>
+          val tz: java.time.ZoneOffset = java.time.ZoneOffset.ofHours(0)
+          val ts: LocalDateTime = LocalDateTime.ofEpochSecond(millisEpoch, 0, tz)
+          Click(UUID.randomUUID(), ts, user)
+      }
+    }
+  
   def sqlClick(
     clickId: UUID,
     clickSqlTimestamp: Timestamp,
@@ -40,6 +49,21 @@ object Click {
 
   def insertClick(click: Click): Update0 =
     sql"insert into clicks (clickId, timestamp, userId) values (${click.clickId}, ${click.sqlTimestamp}, ${click.user.userId})".update
+
+  def createAndInsertClick(user: User, opMillisEpoch: Option[Long]): ConnectionIO[Click] =
+    LiftIO[ConnectionIO].liftIO(createClick(user, opMillisEpoch)).flatMap { click =>
+      insertClick(click).run // TODO do something with return row count
+        .map { _ => click } 
+        .flatMap { click =>
+          LiftIO[ConnectionIO].liftIO(IO(println("inserted click: "+click))).map { _ =>
+            click
+          }
+        }
+    }
+
+  def createAndInsertClickIO(user: User, opMillisEpoch: Option[Long]): IO[Click] =
+    createAndInsertClick(user, opMillisEpoch).transact(DB.xa)
+  
 
   val clickCount: Query0[Int] =
     sql"select count(*) from clicks".query[Int] // TODO use long?

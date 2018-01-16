@@ -12,4 +12,34 @@ GET http://localhost:80/user?userId=2228f926-0bbd-43b9-afe5-8fda32ef3473
 
 GET http://localhost:80/user?userId=fff0f95c-5634-4ce1-8cf1-79feee303f16
 
-##
+## click
+
+POST http://localhost:80/analytics?userId=2228f926-0bbd-43b9-afe5-8fda32ef3473&event=click
+
+#
+
+## click with millis
+
+POST http://localhost:80/analytics?userId=2228f926-0bbd-43b9-afe5-8fda32ef3473&event=click&timestamp=123456
+
+
+## click
+
+POST http://localhost:80/analytics?userId=aa7159fb-9936-4df0-8be0-013c3796ed5b&event=click
+
+#
+
+## click with millis
+
+POST http://localhost:80/analytics?userId=aa7159fb-9936-4df0-8be0-013c3796ed5b&event=click&timestamp=123456
+
+
+## impression
+
+POST http://localhost:80/analytics?userId=aa7159fb-9936-4df0-8be0-013c3796ed5b&event=impression
+
+#
+
+## impression with millis
+
+POST http://localhost:80/analytics?userId=aa7159fb-9936-4df0-8be0-013c3796ed5b&event=impression&timestamp=123456

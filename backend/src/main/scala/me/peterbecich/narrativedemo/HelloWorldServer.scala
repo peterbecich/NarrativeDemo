@@ -17,7 +17,8 @@ import java.util.UUID
 
 object Params {
   // http://http4s.org/v0.18/api/org/http4s/dsl/impl/QueryParamDecoderMatcher.html
-  implicit val timestampParamMatcher = new QueryParamDecoderMatcher[Long]("timestamp"){}
+  object TimestampParamMatcher extends QueryParamDecoderMatcher[Long]("timestamp")
+  object OpTimestampParamMatcher extends OptionalQueryParamDecoderMatcher[Long]("timestamp")
 
   implicit def unapplyUUID(str: String): Option[UUID] =
     Try(UUID.fromString(str)).toOption
@@ -37,6 +38,7 @@ object Params {
   //     if(value.value.toLowerCase() == "click")
   //       Validated.Valid(
 
+  object EventTypeQueryParamMatcher extends QueryParamDecoderMatcher[String]("event")
 
 }
 
@@ -57,6 +59,41 @@ object HelloWorldServer extends StreamApp[IO] with Http4sDsl[IO] {
       User.retrieveUserIO(userId).flatMap { opUser => opUser match {
         case Some(user) => Ok(User.JSON.userJson(user))
         case None => NotFound("user does not exist")
+      }
+      }
+
+    // case POST -> Root / "analytics" :?
+    //     UserIdQueryParamMatcher(userId) +&
+    //     EventTypeQueryParamMatcher(eventType) =>
+    //   User.retrieveUserIO(userId).flatMap { opUser => opUser match {
+    //     case None => NotFound("user does not exist")
+    //     case Some(user) =>
+    //       if (eventType.toLowerCase() == "click") {
+    //         Click.createAndInsertClickIO(user, None).flatMap { click => NoContent() }
+    //       } else if (eventType.toLowerCase() == "impression") {
+    //         ???
+    //       } else {
+    //         println("bad event type: "+eventType)
+    //         BadRequest("event type $eventType does not exist")
+    //       }
+    //   }
+    //   }
+
+
+    case POST -> Root / "analytics" :?
+        OpTimestampParamMatcher(opMillisEpoch) +&
+        UserIdQueryParamMatcher(userId) +&
+        EventTypeQueryParamMatcher(eventType) =>
+      User.retrieveUserIO(userId).flatMap { opUser => opUser match {
+        case None => NotFound("user does not exist")
+        case Some(user) =>
+          if (eventType.toLowerCase() == "click") {
+            Click.createAndInsertClickIO(user, opMillisEpoch).flatMap { click => NoContent() }
+          } else if (eventType.toLowerCase() == "impression") {
+            Impression.createAndInsertImpressionIO(user, opMillisEpoch).flatMap { click => NoContent() }
+          } else {
+            BadRequest("event type $eventType does not exist")
+          }
       }
       }
 
