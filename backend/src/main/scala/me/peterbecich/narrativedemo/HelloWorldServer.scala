@@ -22,14 +22,6 @@ object Params {
   implicit def unapplyUUID(str: String): Option[UUID] =
     Try(UUID.fromString(str)).toOption
 
-  // object UserParamMatcher extends QueryParamDecoderMatcher[UUID]("user")
-
-  // implicit val userParamMatcher: QueryParamDecoder[UUID] =
-  //   QueryParamDecoder[String].flatMap { str => unapplyUUID(str) match {
-  //     case Some(uuid) => QueryParamDecoder.success[UUID](uuid)
-  //     case None => QueryParamDecoder.fail[UUID](str, "unparsable UUID")
-  //   }}
-
   // http://http4s.org/v0.18/api/org/http4s/ParseFailure.html
   implicit val userParamDecoder = new QueryParamDecoder[UUID] {
     def decode(value: QueryParameterValue): ValidatedNel[ParseFailure, UUID] =
@@ -47,12 +39,18 @@ object Params {
 }
 
 import Params._
+import User.JSON._
 
 // http://http4s.org/v0.18/dsl/
 object HelloWorldServer extends StreamApp[IO] with Http4sDsl[IO] {
   val service = HttpService[IO] {
     case GET -> Root / "hello" / name =>
       Ok(Json.obj("message" -> Json.fromString(s"Hello, ${name}")))
+    
+    case POST -> Root / "user" =>
+      User.createAndInsertNewUserIO
+        .flatMap { user => Ok(User.JSON.userJson(user)) }
+
     // case GET -> Root / "analytics" :? 
   }
 

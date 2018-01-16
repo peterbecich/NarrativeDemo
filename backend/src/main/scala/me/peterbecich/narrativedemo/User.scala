@@ -5,6 +5,8 @@ import doobie.postgres.implicits._
 
 import cats._, cats.data._, cats.effect.IO, cats.implicits._
 
+import cats.effect._
+
 import java.util.UUID
 import java.time.LocalDateTime
 
@@ -25,7 +27,26 @@ case class User(userId: UUID, createdAt: LocalDateTime) {
 
 object User {
 
+  object JSON {
+    import io.circe._
+    import io.circe.Encoder
+    import io.circe.syntax._
+    import io.circe.literal._
+    import io.circe.generic.semiauto._
+
+    implicit val LocalDateTimeEncoder: Encoder[LocalDateTime] =
+      Encoder.instance { localDateTime => json"""${localDateTime.toString}""" }
+
+    implicit val userEncoder: Encoder[User] = deriveEncoder
+
+    implicit def userJson(user: User): io.circe.Json = user.asJson
+
+  }
+
   def newUser: User = User(UUID.randomUUID(), LocalDateTime.now())
+  val createNewUser = IO(newUser).flatMap { user =>
+    IO(println("created new user: "+user)).map { _ => user }
+  }
 
   def sqlUser(userId: UUID, sqlCreatedAt: java.sql.Timestamp): User =
     User(userId, sqlCreatedAt.toLocalDateTime())
@@ -34,6 +55,22 @@ object User {
 
   def insertUser(user: User): Update0 =
     sql"insert into users (userId, createdAt) values (${user.userId}, ${user.sqlCreatedAt})".update
+
+  // https://static.javadoc.io/org.tpolecat/doobie-core_2.12/0.5.0-M13/doobie/free/index.html#ConnectionIO[A]=doobie.free.connection.ConnectionIO[A]
+  val createAndInsertNewUser: ConnectionIO[User] =
+    LiftIO[ConnectionIO].liftIO(createNewUser).flatMap { user =>
+      insertUser(user).run.map { _ => // TODO make use of row count
+        user
+      }
+    }
+
+  val createAndInsertNewUserIO: IO[User] =
+    createAndInsertNewUser.transact(DB.xa).flatMap { user =>
+      IO(println("created and inserted new user: "+user)).flatMap { _ =>
+        IO(user)
+      }
+    }
+
 
   val userCount: Query0[Int] =
     sql"select count(*) from users".query[Int]
