@@ -70,9 +70,9 @@ object DoobieTest extends App {
 
   println("get clicks")
 
-  // val clicks = Click._retrieveClicks.list.transact(xa).unsafeRunSync
+  val clicks = Click._retrieveClicks.list.transact(xa).unsafeRunSync
 
-  // clicks.foreach(println(_))
+  clicks.foreach(println(_))
 
 
 }

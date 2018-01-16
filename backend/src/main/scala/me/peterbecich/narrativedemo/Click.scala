@@ -7,6 +7,7 @@ import cats._, cats.data._, cats.effect.IO, cats.implicits._
 
 import java.util.UUID
 import java.time.LocalDateTime
+import java.sql.Timestamp
 
 // https://www.postgresql.org/docs/current/static/datatype-datetime.html
 // https://jdbc.postgresql.org/documentation/head/8-date-time.html
@@ -21,7 +22,12 @@ object Click {
   def newClick(user: User): Click =
     Click(UUID.randomUUID(), LocalDateTime.now(), user)
 
-  def sqlClick(clickId: UUID, sqlTimestamp: java.sql.Timestamp, userId: UUID): Click = ???
+  def sqlClick(
+    clickId: UUID,
+    clickSqlTimestamp: Timestamp,
+    userId: UUID,
+    userSqlTimestamp: Timestamp
+  ): Click = Click(clickId, clickSqlTimestamp.toLocalDateTime(), User(userId, userSqlTimestamp.toLocalDateTime()))
 
   // https://static.javadoc.io/org.tpolecat/doobie-core_2.12/0.5.0-M13/doobie/util/composite$.html#Composite
   // https://static.javadoc.io/org.tpolecat/doobie-core_2.12/0.5.0-M13/doobie/util/meta$$Meta.html
@@ -38,7 +44,15 @@ object Click {
     sql"select count(*) from clicks".query[Int] // TODO use long?
 
   val _retrieveClicks: Query0[(UUID, java.sql.Timestamp, UUID, java.sql.Timestamp)] =
-    sql"select (clickId, timestamp, userId, createdAt) from clicks join users on clicks.userId == users.userId"
+    sql"select (clicks.clickId, clicks.timestamp, clicks.userId, users.createdAt) from clicks join users on clicks.userId = users.userId"
       .query[(UUID, java.sql.Timestamp, UUID, java.sql.Timestamp)]
+
+  val retrieveClicks: Query0[Click] =
+    _retrieveClicks
+      .map { case (clickId, clickSqlTimestamp, userId, userSqlTimestamp) =>
+        sqlClick(clickId, clickSqlTimestamp, userId, userSqlTimestamp)
+      }
+
+
 
 }
