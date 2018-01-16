@@ -13,7 +13,8 @@ import java.sql.Timestamp
 // https://jdbc.postgresql.org/documentation/head/8-date-time.html
 // http://tpolecat.github.io/doobie/docs/15-Extensions-PostgreSQL.html
 
-case class Click(clickId: UUID, timestamp: LocalDateTime, user: User) {
+case class Click(clickId: UUID, timestamp: LocalDateTime, user: User)
+    extends Event {
   lazy val sqlTimestamp: java.sql.Timestamp = java.sql.Timestamp.valueOf(timestamp)
 }
 

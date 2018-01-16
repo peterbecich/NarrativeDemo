@@ -8,7 +8,8 @@ import cats._, cats.data._, cats.effect.IO, cats.implicits._
 import java.util.UUID
 import java.time.LocalDateTime
 
-case class Impression(impressionId: UUID, timestamp: LocalDateTime, user: User) {
+case class Impression(impressionId: UUID, timestamp: LocalDateTime, user: User)
+    extends Event {
   lazy val sqlTimestamp: java.sql.Timestamp = java.sql.Timestamp.valueOf(timestamp)
 }
 
