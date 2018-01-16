@@ -23,12 +23,14 @@ object Params {
     Try(UUID.fromString(str)).toOption
 
   // http://http4s.org/v0.18/api/org/http4s/ParseFailure.html
-  implicit val userParamDecoder = new QueryParamDecoder[UUID] {
+  implicit val uuidParamDecoder = new QueryParamDecoder[UUID] {
     def decode(value: QueryParameterValue): ValidatedNel[ParseFailure, UUID] =
       Validated.catchNonFatal(UUID.fromString(value.value))
         .leftMap { (throwable: Throwable) => ParseFailure(throwable.toString, value.value) }
         .toValidatedNel
   }
+
+  object UserIdQueryParamMatcher extends QueryParamDecoderMatcher[UUID]("userId")
 
   // implicit val eventParamDecoder = new QueryParamDecoder[Event] {
   //   def decode(value: QueryParameterValue): ValidatedNel[ParseFailure, Event] =
@@ -50,6 +52,13 @@ object HelloWorldServer extends StreamApp[IO] with Http4sDsl[IO] {
     case POST -> Root / "user" =>
       User.createAndInsertNewUserIO
         .flatMap { user => Ok(User.JSON.userJson(user)) }
+
+    case GET -> Root / "user" :? UserIdQueryParamMatcher(userId) =>
+      User.retrieveUserIO(userId).flatMap { opUser => opUser match {
+        case Some(user) => Ok(User.JSON.userJson(user))
+        case None => NotFound("user does not exist")
+      }
+      }
 
     // case GET -> Root / "analytics" :? 
   }

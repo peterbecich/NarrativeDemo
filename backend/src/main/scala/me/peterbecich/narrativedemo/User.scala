@@ -9,6 +9,7 @@ import cats.effect._
 
 import java.util.UUID
 import java.time.LocalDateTime
+import java.sql.Timestamp
 
 /*
 [error]   If me.peterbecich.narrativedemo.User is a simple type (or option thereof) that maps to a single column, you're
@@ -22,7 +23,7 @@ http://tpolecat.github.io/doobie/docs/17-FAQ.html#how-do-i-resolve-error-could-n
 
 // TODO user created timestamp
 case class User(userId: UUID, createdAt: LocalDateTime) {
-  lazy val sqlCreatedAt: java.sql.Timestamp = java.sql.Timestamp.valueOf(createdAt)
+  lazy val sqlCreatedAt: Timestamp = Timestamp.valueOf(createdAt)
 }
 
 object User {
@@ -48,7 +49,7 @@ object User {
     IO(println("created new user: "+user)).map { _ => user }
   }
 
-  def sqlUser(userId: UUID, sqlCreatedAt: java.sql.Timestamp): User =
+  def sqlUser(userId: UUID, sqlCreatedAt: Timestamp): User =
     User(userId, sqlCreatedAt.toLocalDateTime())
 
   // http://tpolecat.github.io/doobie/docs/07-Updating.html#inserting
@@ -77,16 +78,32 @@ object User {
 
   // Exception in thread "main" doobie.util.invariant$InvalidObjectMapping: SQL object of class org.postgresql.util.PGobject cannot be cast to mapped class java.util.UUID.
 
-  val _retrieveUsers: Query0[(UUID, java.sql.Timestamp)] =
+  val _retrieveUsers: Query0[(UUID, Timestamp)] =
     sql"select userId, createdAt from users"
-      .query[(UUID, java.sql.Timestamp)]
+      .query[(UUID, Timestamp)]
 
-  val _userList: ConnectionIO[List[(UUID, java.sql.Timestamp)]] =
+  val _userList: ConnectionIO[List[(UUID, Timestamp)]] =
     _retrieveUsers.list
   
   val retrieveUsers: Query0[User] =
     _retrieveUsers
       .map { case (userId, sqlCreatedAt) => sqlUser(userId, sqlCreatedAt) }
 
+  // http://tpolecat.github.io/doobie/docs/05-Parameterized.html
+  // def _retrieveUser(userId: UUID): Query[UUID, (UUID, Timestamp)] =
+  //   sql"select userId, createdAt from users where userId = $userId".query[(UUID, Timestamp)]
+
+  def _retrieveUserQuery(userId: UUID): Query0[(UUID, Timestamp)] =
+    sql"select userId, createdAt from users where userId = $userId".query[(UUID, Timestamp)]
+
+  def retrieveUserQuery(userId: UUID): Query0[User] =
+    _retrieveUserQuery(userId)
+      .map { case (userId, sqlCreatedAt) => sqlUser(userId, sqlCreatedAt) }
+  
+  def retrieveUser(userId: UUID): ConnectionIO[Option[User]] =
+    retrieveUserQuery(userId: UUID).option
+
+  def retrieveUserIO(userId: UUID): IO[Option[User]] =
+    retrieveUser(userId).transact(DB.xa)
 
 }

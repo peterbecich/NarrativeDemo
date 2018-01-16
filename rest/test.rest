@@ -3,4 +3,13 @@
 POST http://localhost:80/user
 
 
+## existent user
+
+GET http://localhost:80/user?userId=2228f926-0bbd-43b9-afe5-8fda32ef3473
+
+
+##  non-existent user
+
+GET http://localhost:80/user?userId=fff0f95c-5634-4ce1-8cf1-79feee303f16
+
 ##
