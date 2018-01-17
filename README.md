@@ -56,3 +56,94 @@ SBT is required.
 
 1. If detached, run `docker-compose down` to stop the Compose application
 
+
+-----------------------
+
+# Endpoints
+
+* Create user
+  ```POST http://localhost:80/user```
+  ``` 
+  {
+  "userId": "97daea7a-4f58-4d15-a540-7c967c9df55b",
+  "createdAt": "2018-01-17T01:05:46.988"
+  }
+  // POST http://localhost:80/user
+  // HTTP/1.1 200 OK
+  ```
+  
+* Retrieve user
+  ```GET http://localhost:80/user?userId=97daea7a-4f58-4d15-a540-7c967c9df55b```
+  ```
+  {
+  "userId": "97daea7a-4f58-4d15-a540-7c967c9df55b",
+  "createdAt": "2018-01-17T01:05:46.988"
+  }
+  // GET http://localhost:80/user?userId=97daea7a-4f58-4d15-a540-7c967c9df55b
+  // HTTP/1.1 200 OK
+  ```
+* Register "click" with user at current UTC time
+  ```POST http://localhost:80/analytics?userId=97daea7a-4f58-4d15-a540-7c967c9df55b&event=click```
+  ```
+  // POST http://localhost:80/analytics?userId=97daea7a-4f58-4d15-a540-7c967c9df55b&event=click
+  // HTTP/1.1 204 No Content
+  ```
+* Register "click" with user at given UTC epoch milliseconds
+  ```POST http://localhost:80/analytics?userId=97daea7a-4f58-4d15-a540-7c967c9df55b&event=click&timestamp=1516151445306```
+  ```
+  // POST http://localhost:80/analytics?userId=97daea7a-4f58-4d15-a540-7c967c9df55b&event=click&timestamp=1516151445306
+  // HTTP/1.1 204 No Content
+  ```
+
+* Register "impression" with user at current UTC time
+  ```POST http://localhost:80/analytics?userId=97daea7a-4f58-4d15-a540-7c967c9df55b&event=impression```
+  ```
+  // POST http://localhost:80/analytics?userId=97daea7a-4f58-4d15-a540-7c967c9df55b&event=impression
+  // HTTP/1.1 204 No Content
+  ```
+
+* Register "impression" with user at given UTC epoch milliseconds
+  ```POST http://localhost:80/analytics?userId=97daea7a-4f58-4d15-a540-7c967c9df55b&event=impression&timestamp=1516151445306```
+  ```
+  // POST http://localhost:80/analytics?userId=97daea7a-4f58-4d15-a540-7c967c9df55b&event=impression&timestamp=1516151445306
+  // HTTP/1.1 204 No Content
+  ```
+  
+* Retrieve number of clicks, impressions, and new users created in the current hour
+  ```GET http://localhost:80/analytics```
+  ```
+  {
+	  "hour": "2018-01-17T01:00",
+	  "usersCreated": 3,
+	  "clicks": 1,
+	  "impressions": 1
+  }
+  // GET http://localhost:80/analytics
+  // HTTP/1.1 200 OK
+  ```
+
+* Retrieve number of clicks, impressions, and new users created in the hour of the given UTC epoch milliseconds
+  ```GET http://localhost:80/analytics?timestamp=1516150000000```
+  ```
+  {
+  "hour": "2018-01-17T00:00",
+  "usersCreated": 4,
+  "clicks": 1,
+  "impressions": 2
+  }
+  // GET http://localhost:80/analytics?timestamp=1516150000000
+  // HTTP/1.1 200 OK
+  ```
+
+
+
+
+
+
+
+  
+
+
+
+
+

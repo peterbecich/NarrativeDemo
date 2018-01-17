@@ -81,7 +81,7 @@ object HelloWorldServer extends StreamApp[IO] with Http4sDsl[IO] {
           case None => CombinedStats.getCombinedStatsJson().flatMap { json => Ok(json) }
           case Some(millisEpoch) =>
             val tz: java.time.ZoneOffset = java.time.ZoneOffset.ofHours(0)
-            val ts: LocalDateTime = LocalDateTime.ofEpochSecond(millisEpoch, 0, tz)
+            val ts: LocalDateTime = LocalDateTime.ofEpochSecond(millisEpoch/1000, 0, tz)
             CombinedStats.getCombinedStatsJson(ts).flatMap { json => Ok(json) }
         }
   }

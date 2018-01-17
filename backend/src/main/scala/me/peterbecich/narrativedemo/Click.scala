@@ -29,7 +29,7 @@ object Click {
         case None => Click(UUID.randomUUID(), LocalDateTime.now(), user)
         case Some(millisEpoch) =>
           val tz: java.time.ZoneOffset = java.time.ZoneOffset.ofHours(0)
-          val ts: LocalDateTime = LocalDateTime.ofEpochSecond(millisEpoch, 0, tz)
+          val ts: LocalDateTime = LocalDateTime.ofEpochSecond(millisEpoch/1000, 0, tz)
           Click(UUID.randomUUID(), ts, user)
       }
     }

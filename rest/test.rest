@@ -5,7 +5,7 @@ POST http://localhost:80/user
 
 ## existent user
 
-GET http://localhost:80/user?userId=2228f926-0bbd-43b9-afe5-8fda32ef3473
+GET http://localhost:80/user?userId=97daea7a-4f58-4d15-a540-7c967c9df55b
 
 
 ##  non-existent user
@@ -14,13 +14,13 @@ GET http://localhost:80/user?userId=fff0f95c-5634-4ce1-8cf1-79feee303f16
 
 ## click
 
-POST http://localhost:80/analytics?userId=2228f926-0bbd-43b9-afe5-8fda32ef3473&event=click
+POST http://localhost:80/analytics?userId=97daea7a-4f58-4d15-a540-7c967c9df55b&event=click
 
 #
 
 ## click with millis
 
-POST http://localhost:80/analytics?userId=2228f926-0bbd-43b9-afe5-8fda32ef3473&event=click&timestamp=123456
+POST http://localhost:80/analytics?userId=97daea7a-4f58-4d15-a540-7c967c9df55b&event=click&timestamp=1516151445306
 
 
 ## click
@@ -36,13 +36,13 @@ POST http://localhost:80/analytics?userId=aa7159fb-9936-4df0-8be0-013c3796ed5b&e
 
 ## impression
 
-POST http://localhost:80/analytics?userId=aa7159fb-9936-4df0-8be0-013c3796ed5b&event=impression
+POST http://localhost:80/analytics?userId=97daea7a-4f58-4d15-a540-7c967c9df55b&event=impression
 
 #
 
 ## impression with millis
 
-POST http://localhost:80/analytics?userId=aa7159fb-9936-4df0-8be0-013c3796ed5b&event=impression&timestamp=123456
+POST http://localhost:80/analytics?userId=97daea7a-4f58-4d15-a540-7c967c9df55b&event=impression&timestamp=1516151445306
 
 
 ## click
@@ -58,3 +58,9 @@ POST http://localhost:80/analytics?userId=baae31a8-b3ae-4373-a01d-706d4b37ee17&e
 ## get analytics
 
 GET http://localhost:80/analytics
+
+## get analytics
+
+GET http://localhost:80/analytics?timestamp=1516150000000
+
+
