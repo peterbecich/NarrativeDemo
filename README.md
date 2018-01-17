@@ -34,6 +34,16 @@ SBT is required.
    [info] Set current project to narrativedemo (in build file:./NarrativeDemo/)
    ```
 1. Run `docker` in SBT to produce the Docker image `peterbecich/narrativedemo:latest`
+   ```
+   sbt:narrativedemo> docker
+   [info] Including from cache: cats-effect_2.12-0.8.jar
+   .
+   .
+   .
+   [info] Successfully built d467a3dfffeb
+   [info] Tagging image d467a3dfffeb with name: peterbecich/narrativedemo:latest
+   [success] Total time: 4 s, completed Jan 16, 2018 4:45:11 PM 
+   ```
 1. Exit SBT
 1. Proceed to start the Compose application
 
