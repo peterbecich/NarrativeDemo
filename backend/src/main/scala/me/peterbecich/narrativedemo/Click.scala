@@ -8,6 +8,8 @@ import cats.effect._
 
 import java.util.UUID
 import java.time.LocalDateTime
+import java.time.Duration
+import java.time.temporal.ChronoUnit
 import java.sql.Timestamp
 
 // https://www.postgresql.org/docs/current/static/datatype-datetime.html
@@ -67,6 +69,27 @@ object Click {
 
   val clickCount: Query0[Int] =
     sql"select count(*) from clicks".query[Int] // TODO use long?
+
+
+  def clickHourCount(ts: LocalDateTime): Query0[Int] = {
+    val hourDT: LocalDateTime = ts.truncatedTo(ChronoUnit.HOURS)
+    val nextHourDT: LocalDateTime = hourDT.plus(Duration.ofHours(1))
+    val hourTS: Timestamp = Timestamp.valueOf(hourDT)
+    val nextHourTS: Timestamp = Timestamp.valueOf(nextHourDT)
+    // sql"select count(*) filter (clicks.timestamp >= $hourTS AND clicks.timestamp < $nextHourTS) from clicks".query[Int]
+    // sql"select count(*) from clicks".query[Int]
+    sql"""
+      select count(*) from (
+        select *
+        from clicks
+        where timestamp >= $hourTS AND timestamp < $nextHourTS
+      ) as hourClicks
+    """.query[Int]
+  }
+
+  def clickHourCountIO(ts: LocalDateTime): IO[Int] =
+    clickHourCount(ts).unique.transact(DB.xa)
+  
 
   val _retrieveClicks: Query0[(UUID, java.sql.Timestamp, UUID, java.sql.Timestamp)] =
     sql"select (clicks.clickId, clicks.timestamp, clicks.userId, users.createdAt) from clicks join users on clicks.userId = users.userId"

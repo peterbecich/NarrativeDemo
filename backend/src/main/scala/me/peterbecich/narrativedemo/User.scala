@@ -9,6 +9,8 @@ import cats.effect._
 
 import java.util.UUID
 import java.time.LocalDateTime
+import java.time.Duration
+import java.time.temporal.ChronoUnit
 import java.sql.Timestamp
 
 /*
@@ -76,6 +78,27 @@ object User {
   val userCount: Query0[Int] =
     sql"select count(*) from users".query[Int]
 
+  def userHourCount(ts: LocalDateTime): Query0[Int] = {
+    val hourDT: LocalDateTime = ts.truncatedTo(ChronoUnit.HOURS)
+    val nextHourDT: LocalDateTime = hourDT.plus(Duration.ofHours(1))
+    val hourTS: Timestamp = Timestamp.valueOf(hourDT)
+    val nextHourTS: Timestamp = Timestamp.valueOf(nextHourDT)
+    // sql"select count(*) from users where timestamp >= $hourTS  timestamp < $nextHourTS".query[Int]
+    // sql"select count(*) from users".query[Int]
+    sql"""
+      select count(*) from (
+        select *
+        from users
+        where createdAt >= $hourTS AND createdAt < $nextHourTS
+      ) as hourUsers
+    """.query[Int]
+  }
+
+  def userHourCountIO(ts: LocalDateTime): IO[Int] =
+    userHourCount(ts).unique.transact(DB.xa)
+  
+  
+
   // Exception in thread "main" doobie.util.invariant$InvalidObjectMapping: SQL object of class org.postgresql.util.PGobject cannot be cast to mapped class java.util.UUID.
 
   val _retrieveUsers: Query0[(UUID, Timestamp)] =
@@ -88,6 +111,26 @@ object User {
   val retrieveUsers: Query0[User] =
     _retrieveUsers
       .map { case (userId, sqlCreatedAt) => sqlUser(userId, sqlCreatedAt) }
+
+  def _retrieveHourUsers(ts: LocalDateTime = LocalDateTime.now()): Query0[(UUID, Timestamp)] = {
+    val hourDT: LocalDateTime = ts.truncatedTo(ChronoUnit.HOURS)
+    val nextHourDT: LocalDateTime = hourDT.plus(Duration.ofHours(1))
+    val hourTS: Timestamp = Timestamp.valueOf(hourDT)
+    val nextHourTS: Timestamp = Timestamp.valueOf(nextHourDT)
+    sql"""
+      select * 
+      from users
+      where createdAt >= $hourTS and createdAt <= $nextHourTS
+    """.query[(UUID, Timestamp)]
+    // sql"select userId, createdAt from users".query[(UUID, Timestamp)]
+  }
+
+  def retrieveHourUsers(ts: LocalDateTime = LocalDateTime.now()): Query0[User] =
+    _retrieveHourUsers(ts)
+      .map { case (userId, sqlCreatedAt) => sqlUser(userId, sqlCreatedAt) }
+
+  def retrieveHourUsersIO(ts: LocalDateTime = LocalDateTime.now()): IO[List[User]] =
+    retrieveHourUsers(ts).list.transact(DB.xa)
 
   // http://tpolecat.github.io/doobie/docs/05-Parameterized.html
   // def _retrieveUser(userId: UUID): Query[UUID, (UUID, Timestamp)] =

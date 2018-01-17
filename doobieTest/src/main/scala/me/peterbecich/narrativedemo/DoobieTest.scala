@@ -74,5 +74,9 @@ object DoobieTest extends App {
 
   clicks.foreach(println(_))
 
+  println("users created in past hour")
+
+  User.retrieveHourUsers().list.transact(xa).unsafeRunSync.foreach(println(_))
+
 
 }

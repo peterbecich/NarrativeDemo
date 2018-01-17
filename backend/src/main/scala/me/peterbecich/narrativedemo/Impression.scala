@@ -8,6 +8,10 @@ import cats.effect._
 
 import java.util.UUID
 import java.time.LocalDateTime
+
+import java.time.Duration
+import java.time.temporal.ChronoUnit
+
 import java.sql.Timestamp
 
 case class Impression(impressionId: UUID, timestamp: LocalDateTime, user: User)
@@ -56,6 +60,26 @@ object Impression {
   val impressionCount: Query0[Int] =
     sql"select count(*) from impressions".query[Int] // TODO use long?
 
+  def impressionHourCount(ts: LocalDateTime): Query0[Int] = {
+    val hourDT: LocalDateTime = ts.truncatedTo(ChronoUnit.HOURS)
+    val nextHourDT: LocalDateTime = hourDT.plus(Duration.ofHours(1))
+    val hourTS: Timestamp = Timestamp.valueOf(hourDT)
+    val nextHourTS: Timestamp = Timestamp.valueOf(nextHourDT)
+    // sql"select count(*) from impression where impression.timestamp >= $hourTS AND impression.timestamp < $nextHourTS".query[Int]
+    // sql"select count(*) filter (impression.timestamp >= $hourTS AND impression.timestamp < $nextHourTS) from impression".query[Int]
+    // sql"select count(*) from impressions".query[Int]
+    sql"""
+      select count(*) from (
+        select * 
+        from impressions
+        where timestamp >= $hourTS AND timestamp < $nextHourTS
+      ) as hourImpressions
+    """.query[Int]
+  }
+
+  def impressionHourCountIO(ts: LocalDateTime): IO[Int] =
+    impressionHourCount(ts).unique.transact(DB.xa)
+  
   val _retrieveImpressions: Query0[(UUID, java.sql.Timestamp, UUID, java.sql.Timestamp)] =
     sql"select (impressions.impressionId, impressions.timestamp, impressions.userId, users.createdAt) from impressions join users on impressions.userId = users.userId"
       .query[(UUID, java.sql.Timestamp, UUID, java.sql.Timestamp)]

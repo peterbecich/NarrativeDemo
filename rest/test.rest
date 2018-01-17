@@ -43,3 +43,18 @@ POST http://localhost:80/analytics?userId=aa7159fb-9936-4df0-8be0-013c3796ed5b&e
 ## impression with millis
 
 POST http://localhost:80/analytics?userId=aa7159fb-9936-4df0-8be0-013c3796ed5b&event=impression&timestamp=123456
+
+
+## click
+
+POST http://localhost:80/analytics?userId=baae31a8-b3ae-4373-a01d-706d4b37ee17&event=click
+
+
+## impression
+
+POST http://localhost:80/analytics?userId=baae31a8-b3ae-4373-a01d-706d4b37ee17&event=impression
+
+
+## get analytics
+
+GET http://localhost:80/analytics

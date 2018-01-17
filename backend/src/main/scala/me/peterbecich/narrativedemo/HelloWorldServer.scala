@@ -14,6 +14,8 @@ import org.http4s.util.StreamApp
 import scala.util.Try
 import java.util.UUID
 
+import java.time.LocalDateTime
+
 
 object Params {
   // http://http4s.org/v0.18/api/org/http4s/dsl/impl/QueryParamDecoderMatcher.html
@@ -32,11 +34,6 @@ object Params {
   }
 
   object UserIdQueryParamMatcher extends QueryParamDecoderMatcher[UUID]("userId")
-
-  // implicit val eventParamDecoder = new QueryParamDecoder[Event] {
-  //   def decode(value: QueryParameterValue): ValidatedNel[ParseFailure, Event] =
-  //     if(value.value.toLowerCase() == "click")
-  //       Validated.Valid(
 
   object EventTypeQueryParamMatcher extends QueryParamDecoderMatcher[String]("event")
 
@@ -62,24 +59,6 @@ object HelloWorldServer extends StreamApp[IO] with Http4sDsl[IO] {
       }
       }
 
-    // case POST -> Root / "analytics" :?
-    //     UserIdQueryParamMatcher(userId) +&
-    //     EventTypeQueryParamMatcher(eventType) =>
-    //   User.retrieveUserIO(userId).flatMap { opUser => opUser match {
-    //     case None => NotFound("user does not exist")
-    //     case Some(user) =>
-    //       if (eventType.toLowerCase() == "click") {
-    //         Click.createAndInsertClickIO(user, None).flatMap { click => NoContent() }
-    //       } else if (eventType.toLowerCase() == "impression") {
-    //         ???
-    //       } else {
-    //         println("bad event type: "+eventType)
-    //         BadRequest("event type $eventType does not exist")
-    //       }
-    //   }
-    //   }
-
-
     case POST -> Root / "analytics" :?
         OpTimestampParamMatcher(opMillisEpoch) +&
         UserIdQueryParamMatcher(userId) +&
@@ -97,7 +76,14 @@ object HelloWorldServer extends StreamApp[IO] with Http4sDsl[IO] {
       }
       }
 
-    // case GET -> Root / "analytics" :? 
+    case GET -> Root / "analytics" :?
+        OpTimestampParamMatcher(opMillisEpoch) => opMillisEpoch match {
+          case None => CombinedStats.getCombinedStatsJson().flatMap { json => Ok(json) }
+          case Some(millisEpoch) =>
+            val tz: java.time.ZoneOffset = java.time.ZoneOffset.ofHours(0)
+            val ts: LocalDateTime = LocalDateTime.ofEpochSecond(millisEpoch, 0, tz)
+            CombinedStats.getCombinedStatsJson(ts).flatMap { json => Ok(json) }
+        }
   }
 
   def stream(args: List[String], requestShutdown: IO[Unit]) =
